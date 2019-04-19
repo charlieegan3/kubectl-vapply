@@ -2,14 +2,17 @@
 
 set -eo pipefail
 
+b_green='\033[1;32m'
+no_color='\033[0m'
+
 readonly namespace="$1"
-echo "Applying to namespace: $namespace"
+echo -e "Applying to namespace: $b_green$namespace$no_color"
 
 readonly group_name="$2"
-echo "Applying to group: $group_name"
+echo -e "Applying to group: $b_green$group_name$no_color"
 
 readonly manifests_path="$4"
-echo "Sourcing manifests from: $manifests_path"
+echo -e "Sourcing manifests from: $b_green$manifests_path$no_color"
 
 version_hash=""
 if [ -d "$manifests_path" ]; then
@@ -17,7 +20,7 @@ if [ -d "$manifests_path" ]; then
 else
   version_hash=$(cat $manifests_path | shasum | cut -d' ' -f1)
 fi
-echo "Current resource version: $version_hash"
+echo -e "Current resource version: $b_green$version_hash$no_color"
 
 readonly resources=$(kubectl api-resources --verbs=list --namespaced -o name  | tr '\n' ',' | sed 's/,$/\n/')
 readonly cmd_apply="kubectl apply -f $manifests_path"
@@ -25,12 +28,14 @@ readonly cmd_label="kubectl label --overwrite=true -f $manifests_path vapply-gro
 readonly cmd_delete="kubectl delete "$resources" -l vapply-group==$group_name,vapply-version,vapply-version!=$version_hash -n $namespace"
 
 set +e # run label even if apply fails
-echo -e "\nApplying new resources..."
-eval $cmd_apply || eval $cmd_label
+echo "Applying new resources..."
+eval $cmd_apply | sed 's/^/    /' || eval $cmd_label | sed 's/^/    /'
 
-echo -e "\nLabeling resources..."
-eval $cmd_label >/dev/null 2>&1 || echo "(One or more resources already labelled)"
+echo "Labeling resources..."
+eval $cmd_label >/dev/null 2>&1 && echo "    (labelled)" || echo "    (One or more resources already labelled)"
 set -e
 
-echo -e "\nDeleting old resources..."
-eval $cmd_delete
+echo "Deleting old resources..."
+eval $cmd_delete | sed 's/^/    /'
+
+echo "vapply complete"

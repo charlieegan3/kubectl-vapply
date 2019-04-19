@@ -1,5 +1,7 @@
 # Versioned Apply
 
+[![asciicast](https://asciinema.org/a/241857.svg)](https://asciinema.org/a/241857)
+
 'Versioned Apply' (`vapply`) is a kubectl plugin that extends `kubectl apply`
 with delete functionality.
 

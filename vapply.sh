@@ -21,7 +21,7 @@ echo "Current resource version: $version_hash"
 
 readonly resources=$(kubectl api-resources --verbs=list --namespaced -o name  | tr '\n' ',' | sed 's/,$/\n/')
 readonly cmd_apply="kubectl apply -f $manifests_path"
-readonly cmd_label="kubectl label --record=true -f $manifests_path vapply-group=$group_name vapply-version=$version_hash"
+readonly cmd_label="kubectl label --overwrite=true -f $manifests_path vapply-group=$group_name vapply-version=$version_hash"
 readonly cmd_delete="kubectl delete "$resources" -l vapply-group==$group_name,vapply-version,vapply-version!=$version_hash -n $namespace"
 
 set +e # run label even if apply completes

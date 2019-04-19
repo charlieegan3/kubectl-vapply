@@ -24,7 +24,7 @@ readonly cmd_apply="kubectl apply -f $manifests_path"
 readonly cmd_label="kubectl label --overwrite=true -f $manifests_path vapply-group=$group_name vapply-version=$version_hash"
 readonly cmd_delete="kubectl delete "$resources" -l vapply-group==$group_name,vapply-version,vapply-version!=$version_hash -n $namespace"
 
-set +e # run label even if apply completes
+set +e # run label even if apply fails
 echo -e "\nApplying new resources..."
 eval $cmd_apply || eval $cmd_label
 

@@ -11,7 +11,12 @@ echo "Applying to group: $group_name"
 readonly manifests_path="$4"
 echo "Sourcing manifests from: $manifests_path"
 
-readonly version_hash=$(cat $manifests_path | shasum | cut -d' ' -f1)
+version_hash=""
+if [ -d "$manifests_path" ]; then
+  version_hash=$(tar -cf - $manifests_path | shasum | cut -d' ' -f1)
+else
+  version_hash=$(cat $manifests_path | shasum | cut -d' ' -f1)
+fi
 echo "Current resource version: $version_hash"
 
 readonly resources=$(kubectl api-resources --verbs=list --namespaced -o name  | tr '\n' ',' | sed 's/,$/\n/')
